@@ -8,6 +8,7 @@ If you find these prompts helpful, please don't hesitate to give us a ⭐star! T
 <br />
 
 1. [**Detect change of tone**](https://github.com/AWeirdDev/prompts/blob/main/prompts/change-of-tone-detection.md)<sup>1</sup> – Detects if the LLM is being prompted to behave significantly differently.
+2. [**Coherence coach**](https://github.com/AWeirdDev/prompts/blob/main/prompts/coherence-coach.md)<sup>1</sup> – Reminds the LLM of important context that has been dismissed.
 
 ***
 
