@@ -1,0 +1,1 @@
+Condense the following text into bullet points of relevant information: {text}
