@@ -1,3 +1,8 @@
+use colored::Colorize;
+use yaml_rust2::{Yaml, YamlLoader};
+
+use crate::tostring;
+
 pub struct Metadata {
     pub name: Option<String>,
     pub author: Option<String>,
@@ -31,22 +36,63 @@ pub fn parse_md(content: String) -> Option<Metadata> {
 
     if lines[0].trim() == "---" {
         let mut i = 1_usize;
-        let mut metadata = Metadata::new();
+        let mut fences = String::new();
 
         while i < lines.len() {
             if lines[i].trim() == "---" {
                 break;
             }
+            fences.push_str(&lines[i]);
+            i += 1;
+        }
 
-            let splits = lines[i].split(':').collect::<Vec<_>>();
-
-            let (key, value) = (splits[0], splits[1]);
-            match metadata.add(key.trim().to_string(), value.trim().to_string()) {
-                Err(e) => println!("\x1b[31m\x1b[1merror\x1b[0m{}\x1b[0m", e),
-                _ => (),
+        let mut metadata = Metadata::new();
+        let docs = YamlLoader::load_from_str(&fences).unwrap();
+        for doc in docs {
+            if !doc["name"].is_badvalue() {
+                match metadata.add(
+                    tostring!("name"),
+                    doc["name"]
+                        .to_owned()
+                        .or(Yaml::String(tostring!("None")))
+                        .as_str()
+                        .unwrap()
+                        .to_string(),
+                ) {
+                    Ok(_) => (),
+                    Err(e) => println!("{}: {}", "error".bold().red(), e),
+                }
             }
 
-            i += 1;
+            if !doc["author"].is_badvalue() {
+                match metadata.add(
+                    tostring!("author"),
+                    doc["author"]
+                        .to_owned()
+                        .or(Yaml::String(tostring!("Unknown")))
+                        .as_str()
+                        .unwrap()
+                        .to_string(),
+                ) {
+                    Ok(_) => (),
+                    Err(e) => println!("{}: {}", "error".bold().red(), e),
+                }
+            }
+
+            if !doc["description"].is_badvalue() {
+                match metadata.add(
+                    tostring!("description"),
+                    doc["description"]
+                        .to_owned()
+                        .or(Yaml::String(tostring!("None")))
+                        .as_str()
+                        .unwrap()
+                        .to_string(),
+                ) {
+                    Ok(_) => (),
+                    Err(e) => println!("{}: {}", "error".bold().red(), e),
+                }
+            }
         }
 
         Some(metadata)

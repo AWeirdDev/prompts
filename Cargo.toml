@@ -7,3 +7,4 @@ edition = "2021"
 clap = { version = "4.5.16", features = ["derive"] }
 colored = "2.1.0"
 inquire = "0.7.5"
+yaml-rust2 = "0.8.1"

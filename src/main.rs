@@ -4,6 +4,7 @@ use inquire::Select;
 
 use md_parser::parse_md;
 
+mod macros;
 mod md_parser;
 
 #[derive(Parser)]
@@ -25,12 +26,6 @@ struct AddCommand {
     name: String,
     #[arg(short, long, default_value = "false")]
     fill: bool,
-}
-
-macro_rules! tostring {
-    ($($x:tt)*) => {
-        format!($($x)*)
-    };
 }
 
 fn main() {
@@ -66,9 +61,9 @@ fn main() {
                     match select_result {
                         Ok(result) => {
                             if result == "🐍 Python-typed" {
-                                println!("Got it. I'll make it Pythonic!\n");
+                                println!("{}", "=> Got it. I'll make it Pythonic!\n".dimmed());
                             } else if result == "📄 Plain text" {
-                                println!("Sure! I'll leave it as it is.\n");
+                                println!("{}", "=> Sure! I'll leave it as it is.\n".dimmed());
                             }
                         }
                         Err(e) => println!("{}: {}", "error".bold().red(), e),
@@ -76,7 +71,7 @@ fn main() {
 
                     if fill {
                         println!(
-                            "Since you passed {} flag, let's fill the values statically.",
+                            "📲 Since you passed {} flag, let's fill the values statically.",
                             "--fill".bold()
                         )
                     }
