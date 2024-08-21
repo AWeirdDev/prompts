@@ -26,6 +26,25 @@ impl Metadata {
             _ => Err(format!("Unknown metadata key: {}", name)),
         }
     }
+
+    pub fn add_from_yaml(&mut self, index: &'static str, doc: &Yaml) -> Result<(), String> {
+        if !doc[index].is_badvalue() {
+            match self.add(
+                index.to_string(),
+                doc[index]
+                    .to_owned()
+                    .or(Yaml::String(tostring!("None")))
+                    .as_str()
+                    .unwrap()
+                    .to_string(),
+            ) {
+                Ok(_) => Ok(()),
+                Err(e) => Err(format!("{}: {}", "error".bold().red(), e)),
+            }
+        } else {
+            Ok(())
+        }
+    }
 }
 
 pub fn parse_md(content: String) -> Option<Metadata> {
@@ -49,50 +68,9 @@ pub fn parse_md(content: String) -> Option<Metadata> {
         let mut metadata = Metadata::new();
         let docs = YamlLoader::load_from_str(&fences).unwrap();
         for doc in docs {
-            if !doc["name"].is_badvalue() {
-                match metadata.add(
-                    tostring!("name"),
-                    doc["name"]
-                        .to_owned()
-                        .or(Yaml::String(tostring!("None")))
-                        .as_str()
-                        .unwrap()
-                        .to_string(),
-                ) {
-                    Ok(_) => (),
-                    Err(e) => println!("{}: {}", "error".bold().red(), e),
-                }
-            }
-
-            if !doc["author"].is_badvalue() {
-                match metadata.add(
-                    tostring!("author"),
-                    doc["author"]
-                        .to_owned()
-                        .or(Yaml::String(tostring!("Unknown")))
-                        .as_str()
-                        .unwrap()
-                        .to_string(),
-                ) {
-                    Ok(_) => (),
-                    Err(e) => println!("{}: {}", "error".bold().red(), e),
-                }
-            }
-
-            if !doc["description"].is_badvalue() {
-                match metadata.add(
-                    tostring!("description"),
-                    doc["description"]
-                        .to_owned()
-                        .or(Yaml::String(tostring!("None")))
-                        .as_str()
-                        .unwrap()
-                        .to_string(),
-                ) {
-                    Ok(_) => (),
-                    Err(e) => println!("{}: {}", "error".bold().red(), e),
-                }
-            }
+            let _ = metadata.add_from_yaml("name", &doc);
+            let _ = metadata.add_from_yaml("author", &doc);
+            let _ = metadata.add_from_yaml("description", &doc);
         }
 
         Some(metadata)

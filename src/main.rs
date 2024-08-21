@@ -71,7 +71,8 @@ fn main() {
 
                     if fill {
                         println!(
-                            "📲 Since you passed {} flag, let's fill the values statically.",
+                            "📲 {}: Since you passed {} flag, let's fill the values statically.",
+                            "filling".bold().cyan(),
                             "--fill".bold()
                         )
                     }
