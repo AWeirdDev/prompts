@@ -1,0 +1,9 @@
+[package]
+name = "prompts"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5.16", features = ["derive"] }
+colored = "2.1.0"
+inquire = "0.7.5"
