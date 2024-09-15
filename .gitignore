@@ -1,2 +1,4 @@
 /target
 preprompt.ps1
+**/__pycache__/
+*.pyd
