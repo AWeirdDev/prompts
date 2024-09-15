@@ -1,3 +1,6 @@
-original prompts moved to `prompts/awdev`
+# prompts
+Instructive prompts for everyday use.
 
-everything is still there
+See the `prompts/` directory.
+
+Under `awdev/`, the prompts are written by me.
