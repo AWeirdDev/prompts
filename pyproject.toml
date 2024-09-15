@@ -1,0 +1,30 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "aip"
+description = "Simple vector database with Rust."
+keywords = ["vector", "database", "vdb", "vector-database", "rust"]
+authors = [
+  { name = "AWeirdDev", email = "aweirdscratcher@gmail.com" },
+]
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dynamic = ["version"]
+dependencies = [
+  "httpx"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/AWeirdDev/prompts"
+"Bug Tracker" = "https://github.com/AWeirdDev/prompts/issues"
+
+[tool.maturin]
+python-source = "python"
+features = ["pyo3/extension-module"]
