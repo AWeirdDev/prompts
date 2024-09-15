@@ -115,7 +115,7 @@ fn main(args: Vec<String>) {
         }
         Command::Preview(PreviewCommand { name }) => {
             let bar = ProgressBar::new_spinner()
-                .with_message(format!("Fetching with {}", "requests".bold().cyan()));
+                .with_message(format!("Fetching with {}", "ureq".bold().cyan()));
             bar.enable_steady_tick(std::time::Duration::from_millis(50));
 
             let content = match get_prompt(name.to_owned()) {
