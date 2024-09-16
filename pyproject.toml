@@ -21,6 +21,9 @@ dependencies = [
   "httpx"
 ]
 
+[project.scripts]
+aip = "aip.cli:main"
+
 [project.urls]
 "Homepage" = "https://github.com/AWeirdDev/prompts"
 "Bug Tracker" = "https://github.com/AWeirdDev/prompts/issues"

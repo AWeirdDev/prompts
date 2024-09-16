@@ -1,21 +1,25 @@
 use std::process::exit;
 
+use anyhow::Result;
 use clap::{Args, Parser, Subcommand};
 use colored::Colorize;
 use indicatif::ProgressBar;
-use inquire::Select;
 
 use pyo3::prelude::*;
 
 mod connection;
+mod inquiries;
 mod macros;
 mod md_parser;
+mod prompts;
 
-use crate::connection::get_prompt;
+use crate::inquiries::inquire_config;
 use crate::md_parser::parse_md;
+use crate::prompts::add_prompt;
+use crate::prompts::get_prompt as _get_prompt;
 
 #[derive(Parser)]
-#[command(version = "0.1.0", about = "aip is an AI prompt manager.")]
+#[command(version = "0.1.0", about = "🦍 aip is an AI prompt manager.")]
 struct CLI {
     #[command(subcommand)]
     command: Command,
@@ -25,13 +29,14 @@ struct CLI {
 enum Command {
     /// Adds a prompt to the current workspace.
     Add(AddCommand),
+    /// Previews a prompt.
     Preview(PreviewCommand),
 }
 
 #[derive(Args)]
 struct AddCommand {
-    /// Name of the prompt. Offline path or online ID.
-    name: String,
+    /// Name of the prompts. Offline path or online ID.
+    names: Vec<String>,
     #[arg(short, long, default_value = "false")]
     fill: bool,
 }
@@ -42,6 +47,16 @@ struct PreviewCommand {
     name: String,
 }
 
+fn get_prompt(name: String) -> Result<String> {
+    let bar = ProgressBar::new_spinner()
+        .with_message(format!("Getting {}", name.to_owned().bold().cyan()));
+    bar.enable_steady_tick(std::time::Duration::from_millis(50));
+
+    let content = _get_prompt(name.to_owned())?;
+    bar.finish_with_message(format!("{} {}", "+".bold().green(), name.to_owned()));
+    Ok(content)
+}
+
 #[pyfunction]
 fn main(args: Vec<String>) {
     let cli = CLI::parse_from(args);
@@ -49,75 +64,49 @@ fn main(args: Vec<String>) {
     ctrlc::set_handler(|| println!("^C")).ok();
 
     match cli.command {
-        Command::Add(AddCommand { name, fill }) => {
-            let content = match std::fs::read_to_string(name.to_owned()) {
+        Command::Add(AddCommand { names, fill }) => {
+            let _config = match inquire_config() {
                 Ok(c) => c,
                 Err(e) => {
-                    println!(
-                        "{}: failed to load: {:?} {}",
-                        "error".bold().red(),
-                        e,
-                        format!("({})", name).dimmed()
-                    );
+                    println!("{}: {:?}", "error".bold().red(), e);
                     exit(-1);
                 }
             };
-            let result = parse_md(content);
 
-            match result {
-                Some(metadata) => {
-                    println!(
-                        "\n{}: {}\n{}: {}\n{}: {}\n",
-                        "name".bold(),
-                        metadata
-                            .name
-                            .unwrap_or(tostring!("None"))
-                            .green()
-                            .bold()
-                            .underline(),
-                        "description".bold().dimmed(),
-                        metadata.description.unwrap_or(tostring!("None")).dimmed(),
-                        "author".bold().dimmed(),
-                        metadata.author.unwrap_or(tostring!("Unknown")).dimmed(),
-                    );
-
-                    let select_result = Select::new(
-                        "How do you want to add this to your project?",
-                        vec!["🐍 Python-typed", "📄 Plain text"],
-                    )
-                    .prompt();
-
-                    match select_result {
-                        Ok(result) => {
-                            if result == "🐍 Python-typed" {
-                                println!("{}", "→ Got it. I'll make it Pythonic!\n".dimmed());
-                            } else if result == "📄 Plain text" {
-                                println!("{}", "→ Sure! I'll leave it as it is.\n".dimmed());
-                            }
-                        }
-                        Err(e) => println!("{}: {}", "error".bold().red(), e),
-                    }
-
-                    if fill {
+            for name in names {
+                let content = match get_prompt(name.to_owned()) {
+                    Ok(c) => c,
+                    Err(e) => {
                         println!(
-                            "📲 {}: Since you passed {} flag, let's fill the values manually.",
-                            "Filling".bold().cyan(),
-                            "--fill".bold()
+                            "{}: failed to load: {:?} {}",
+                            "error".bold().red(),
+                            e,
+                            format!("({})", name).dimmed()
                         );
+                        exit(-1);
                     }
+                };
+                println!();
+
+                let result = parse_md(content.to_owned());
+
+                match result {
+                    Some(m) => {
+                        if fill {
+                            println!(
+                                "📲 {}: Since you passed {} flag, let's fill the values manually.",
+                                "Filling".bold().cyan(),
+                                "--fill".bold()
+                            );
+                        }
+
+                        add_prompt(name, m, content).unwrap();
+                    }
+                    None => {}
                 }
-                None => println!(
-                    "{}: failed to parse metadata for {}",
-                    "error".red().bold(),
-                    name.cyan()
-                ),
             }
         }
         Command::Preview(PreviewCommand { name }) => {
-            let bar = ProgressBar::new_spinner()
-                .with_message(format!("Fetching with {}", "ureq".bold().cyan()));
-            bar.enable_steady_tick(std::time::Duration::from_millis(50));
-
             let content = match get_prompt(name.to_owned()) {
                 Ok(t) => t,
                 Err(e) => {
@@ -130,9 +119,7 @@ fn main(args: Vec<String>) {
                     exit(-1);
                 }
             };
-
-            bar.finish();
-            println!("{content}");
+            println!("\n{content}");
         }
     }
 }

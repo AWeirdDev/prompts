@@ -1,6 +1,7 @@
 ---
-title: Character
+name: Character
 description: Prompts the LLM to roleplay as a character from the specified series.
+author: f
 parameters:
 - character
 - series

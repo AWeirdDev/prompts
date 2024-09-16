@@ -1,6 +1,6 @@
 use ureq::Error;
 
-pub fn get_prompt(name: String) -> Result<String, Error> {
+pub fn gh_get_prompt(name: String) -> Result<String, Error> {
     let content = ureq::get(
         format!(
             "https://raw.githubusercontent.com/AWeirdDev/prompts/main/prompts/{}.md",

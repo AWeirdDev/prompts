@@ -4,11 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = "1.0.89"
 clap = { version = "4.5.16", features = ["derive"] }
 colored = "2.1.0"
 ctrlc = "3.4.5"
 indicatif = "0.17.8"
 inquire = "0.7.5"
 pyo3 = { version = "0.22.2", features = ["extension-module"] }
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = { version = "1.0.128", features = ["std"] }
 ureq = "2.10.1"
 yaml-rust2 = "0.8.1"

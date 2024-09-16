@@ -16,7 +16,7 @@ Adds a prompt.
 ## Syntax
 ```mdx
 ---
-title: Title
+name: Title
 description: Description
 author: Author
 parameters:
